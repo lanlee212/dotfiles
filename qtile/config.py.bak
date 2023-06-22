@@ -1,0 +1,302 @@
+# Copyright (c) 2010 Aldo Cortesi
+# Copyright (c) 2010, 2014 dequis
+# Copyright (c) 2012 Randall Ma
+# Copyright (c) 2012-2014 Tycho Andersen
+# Copyright (c) 2012 Craig Barnes
+# Copyright (c) 2013 horsik
+# Copyright (c) 2013 Tao Sauvage
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+import os, socket, json, subprocess, random, requests
+from os.path import expanduser
+from libqtile import bar, layout, widget, extension
+from libqtile.config import Click, Drag, Group, Key, Match, Screen, ScratchPad, DropDown
+from libqtile.lazy import lazy
+from libqtile.utils import guess_terminal
+from libqtile import hook
+
+
+
+#Varibles 
+
+mod = "mod4"
+mod1 = "control"
+terminal = guess_terminal()
+font = "Ubuntu Regular"
+font1 = "Symbols Nerd Font"
+home = os.path.expanduser('~')
+
+bg = "#212121",
+bg_alt = "#545454",
+fg = "#ECEFF1" ,
+fg_alt = "#ffffff",
+blue = "#82aaff",
+cyan = "#89ddff",
+green = "#C3E88D",
+orange = "#F78C6C",
+pink = "#F07178",
+purple = "#C792EA",
+red = "#FF5370",
+yellow = "#FFCB6B",
+trans = "#00000000",
+semi_trans_black = "#cc000000",
+shade_1 = "#c0cad1",
+shade_2 = "#cfd6db",
+shade_3 = "#dde3e6",
+shade_4 = "#eceff1",
+shade_5 = "#fbfbfc"
+
+
+# Functions 
+
+@hook.subscribe.startup_once
+def start_once():
+  subprocess.call(home + '/.config/qtile/autostart.sh')
+
+def calendar_notification(qtile):{
+    subprocess.call(home + '/.config/qtile/scripts/calendar')
+}
+
+def calendar_notification_prev(qtile):{
+    subprocess.call([home + '/.config/qtile/scripts/calendar', 'prev'])
+}
+
+def calendar_notification_next(qtile):{
+    subprocess.call([home + '/.config/qtile/scripts/calendar', 'next'])
+}
+
+# KeyBindings
+
+keys = [
+    # A list of available commands that can be bound to keys can be found
+    # at https://docs.qtile.org/en/latest/manual/config/lazy.html
+    # Switch between windows
+    Key([mod], "Left", lazy.layout.left(), desc="Move focus to left"),
+    Key([mod], "Right", lazy.layout.right(), desc="Move focus to right"),
+    Key([mod], "Down", lazy.layout.down(), desc="Move focus down"),
+    Key([mod], "Up", lazy.layout.up(), desc="Move focus up"),    
+    Key([mod], "space", lazy.layout.next(), desc="Move window focus to other window"),
+    # Move windows between left/right columns or move up/down in current stack.
+    # Moving out of range in Columns layout will create new column.
+    Key([mod, "shift"], "Left", lazy.layout.shuffle_left(), desc="Move window to the left"),
+    Key([mod, "shift"], "Right", lazy.layout.shuffle_right(), desc="Move window to the right"),
+    Key([mod, "shift"], "Down", lazy.layout.shuffle_down(), desc="Move window down"),
+    Key([mod, "shift"], "Up", lazy.layout.shuffle_up(), desc="Move window up"),
+    # Grow windows. If current window is on the edge of screen and direction
+    # will be to screen edge - window would shrink.
+    Key([mod, "control"], "Left", lazy.layout.grow_left(), desc="Grow window to the left"),
+    Key([mod, "control"], "Right", lazy.layout.grow_right(), desc="Grow window to the right"),
+    Key([mod, "control"], "Down", lazy.layout.grow_down(), desc="Grow window down"),
+    Key([mod, "control"], "Up", lazy.layout.grow_up(), desc="Grow window up"),
+    Key([mod], "n", lazy.layout.normalize(), desc="Reset all window sizes"),
+    Key([mod], "f", lazy.window.toggle_floating() ),
+    # Toggle between split and unsplit sides of stack.
+    # Split = all windows displayed
+    # Unsplit = 1 window displayed, like Max layout, but still with
+    # multiple stack panes
+    Key(
+        [mod, "shift"],
+        "Return",
+        lazy.layout.toggle_split(),
+        desc="Toggle between split and unsplit sides of stack",
+    ),
+    # Toggle between different layouts as defined below
+    Key([mod], "Tab", lazy.next_layout(), desc="Toggle between layouts"),
+    # Commands 
+    Key([mod], "Return", lazy.spawn(terminal), desc="Launch terminal"),
+    Key([mod], "equal", lazy.spawn("amixer set 'Master' 10%+"), desc="Increase Volume"),
+    Key([mod], "minus", lazy.spawn("amixer set 'Master' 10%-"), desc="Decrease Volume"),
+    Key([mod], "m", lazy.spawn("amixer -q sset Master toggle"), desc="Mute Toggle"),
+    Key([mod], "q", lazy.window.kill(), desc="Kill focused window"),
+    Key([mod], "l", lazy.spawn("dm-tool lock"), desc="lock screen"),
+    Key([mod, "shift"], "r", lazy.reload_config(), desc="Reload the config"),
+    Key([mod, "shift"], "q", lazy.spawn("/home/lee/.config/qtile/rofi/powermenu.sh"), desc="Shutdown Qtile"),
+    Key([mod], "r", lazy.spawncmd(), desc="Spawn a command using a prompt widget"),
+    Key([mod], 'd', lazy.spawn("/home/lee/.config/qtile/rofi/launcher.sh"),desc="Rofi Launcher"),
+
+]
+
+
+
+# Work Spaces 
+
+groups = [
+    Group("1", label=""),
+    Group("2", label=""),
+    Group("3", label=""),
+    Group("4", label=""),
+    Group("5", label="", layout="max")
+   # Group(1,2,3,4,5),
+    
+]
+
+
+for i in groups:
+    keys.extend(
+        [
+            # mod1 + letter of group = switch to group
+            Key([mod],i.name,lazy.group[i.name].toscreen(),desc="Switch to group {}".format(i.name)),
+            # mod1 + shift + letter of group = switch to & move focused window to group
+            Key([mod, "shift"],i.name,lazy.window.togroup(i.name, switch_group=True),desc="Switch to & move focused window to group {}".format(i.name)),
+            # Or, use below if you prefer not to switch to that group.
+            # # mod1 + shift + letter of group = move focused window to group
+            # Key([mod, "shift"], i.name, lazy.window.togroup(i.name),
+            #     desc="move focused window to group {}".format(i.name)),
+        ]
+    )
+
+
+
+# Scratch Pads 
+
+groups.append(ScratchPad('scratchpad', [
+    DropDown('term', 'alacritty', width=0.9, height=0.4, x=0.05, y=0.005, opacity=1),
+    DropDown('file', 'nemo', width=0.9, height=0.6, x=0.05, y=0.005, opacity=1),
+    DropDown('calc', 'galculator', width=0.0295, height=0.065, x=0.42, y=0.005, opacity=1)
+   ]))
+
+keys.extend([
+    Key([], "F12", lazy.group['scratchpad'].dropdown_toggle('term')),
+    Key([mod], "a",lazy.group['scratchpad'].dropdown_toggle('file')),
+    Key([mod], "c",lazy.group['scratchpad'].dropdown_toggle('calc')),
+])
+
+layouts = [
+    layout.MonadTall(border_focus= shade_5,border_normal= shade_1, border_width=1,  margin = 5,single_border_width=0),    
+    #layout.Columns(border_focus= 4,border_normal= shade_1, border_width=1,  margin = 5),
+    layout.Max(margin= 5),
+    # layout.Stack(num_stacks=2),
+    # layout.Bsp(),
+    # layout.Matrix(),
+    # layout.MonadWide(),
+    # layout.RatioTile(),
+    # layout.Tile(),
+    # layout.TreeTab(),
+    # layout.VerticalTile(),
+    # layout.Zoomy(),
+    layout.Floating(border_focus = shade_1, border_normal = shade_5),
+]
+
+widget_defaults = dict(
+    font=font,
+    fontsize=12,
+    padding=2,
+)
+extension_defaults = widget_defaults.copy()
+
+#Bar config  
+
+
+screens = [
+    Screen(     
+                
+        top=bar.Bar(
+            [   
+                widget.GroupBox(font = font,borderwidth=0,active=shade_3,block_highlight_text_color=shade_5,fontsize=14,highlight_method='text',this_current_screen_border=shade_5),                
+                widget.Prompt(),
+                #widget.CurrentLayoutIcon(scale=.65,),
+                widget.Sep(),
+                widget.WindowName(format='{class}',width=500,scroll=True,scroll_delay=2,scroll_repeat=True,scroll_step=1),  
+                widget.Spacer(length=5),
+                #widget.ALSAWidget(update_interval=0),                    
+                widget.Spacer(),
+                widget.OpenWeather(api='210219ca3a2b7c7a334558930cac6635',cityid='4696376',format='{icon} {temp}{units_temperature} {weather}',metric=False), 
+                widget.Spacer(length=5),
+                widget.Sep(), 
+                widget.TextBox(fmt='󰛳',font=font1,fontsize=14),
+                widget.Net(prefix='M',E = '{down} ↓↑ {up}'),
+                widget.Spacer(length=5),
+                widget.Sep(), 
+                widget.TextBox(fmt='',font=font1,fontsize=14),
+                widget.CheckUpdates(distro='Arch_yay',no_update_string='Updated'),
+                widget.Spacer(length=5),                 
+                #widget.PulseVolume(emoji=True), 
+                widget.Spacer(length=5),
+                widget.Sep(),                            
+                widget.StatusNotifier(),
+                widget.Systray(padding=0,icon_size=16),
+                widget.Spacer(length=5),
+                widget.Sep(),
+                widget.Clock(format="%I:%M %p",
+                             mouse_callbacks={"Button1": lazy.function(calendar_notification),
+                                              'Button2':  lazy.function(calendar_notification_prev),
+                                              'Button3':  lazy.function(calendar_notification_next)
+                                              },),
+                widget.Spacer(length=5)
+                
+            ],
+            24,
+            margin = [5,5,0,5],
+            background = bg,
+            #border_width=[0, 0, 0, 0],  # Draw top and bottom borders
+            #border_color= trans
+        ),        
+        
+    ),
+]
+
+# Drag floating layouts.
+mouse = [
+    Drag([mod], "Button1", lazy.window.set_position_floating(), start=lazy.window.get_position()),
+    Drag([mod], "Button3", lazy.window.set_size_floating(), start=lazy.window.get_size()),
+    Click([mod], "Button2", lazy.window.bring_to_front()),
+]
+
+dgroups_key_binder = None
+dgroups_app_rules = []  # type: list
+follow_mouse_focus = True
+bring_front_click = False
+cursor_warp = False
+floating_layout = layout.Floating( border_focus = shade_5, border_normal = shade_1, border_width = 0,
+    float_rules=[
+        # Run the utility of `xprop` to see the wm class and name of an X client.
+        *layout.Floating.default_float_rules,
+        Match(wm_class="confirmreset"),  # gitk
+        Match(wm_class="makebranch"),  # gitk
+        Match(wm_class="maketag"),  # gitk
+        Match(wm_class="ssh-askpass"),  # ssh-askpass
+        Match(title="branchdialog"),  # gitk
+        Match(title="pinentry"),  # GPG key password entry
+        Match(title="MEGAsync"),
+        Match(wm_class="nemo"),
+        Match(wm_class="file-roller"),
+        Match(wm_class="pamac-manager")
+    ]
+)
+auto_fullscreen = True
+focus_on_window_activation = "smart"
+reconfigure_screens = True
+
+# If things like steam games want to auto-minimize themselves when losing
+# focus, should we respect this or not?
+auto_minimize = True
+
+# When using the Wayland backend, this can be used to configure input devices.
+wl_input_rules = None
+
+# XXX: Gasp! We're lying here. In fact, nobody really uses or cares about this
+# string besides java UI toolkits; you can see several discussions on the
+# mailing lists, GitHub issues, and other WM documentation that suggest setting
+# this string if your java app doesn't work correctly. We may as well just lie
+# and say that we're a working one by default.
+#
+# We choose LG3D to maximize irony: it is a 3D non-reparenting WM written in
+# java that happens to be on java's whitelist.
+wmname = "LG3D"
+

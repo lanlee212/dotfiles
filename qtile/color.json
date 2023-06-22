@@ -1,0 +1,22 @@
+
+{
+"bg" : "#212121",
+"bg_alt" : "#545454",
+"fg" : "#ECEFF1" ,
+"fg_alt" : "#ffffff",
+"blue" : "#82aaff",
+"cyan" : "#89ddff",
+"green" : "#C3E88D",
+"orange" : "#F78C6C",
+"pink" : "#F07178",
+"purple" : "#C792EA",
+"red" : "#FF5370",
+"yellow" : "#FFCB6B",
+"trans" : "#00000000",
+"semi_trans_black" : "#cc000000",
+"shade_1" : "#2b2b2b",
+"shade_2" : "#3e3e3e",
+"shade_3" : "#525252",
+"shade_4" : "#666666",
+"shade_5" : "#797979"
+}
