@@ -42,6 +42,27 @@
     LC_TIME = "en_US.UTF-8";
   };
 
+  # Polkit 
+  security.polkit.enable = true;
+  security.polkit.extraConfig = ''
+   polkit.addRule(function(action, subject) {
+     if (
+       subject.isInGroup("users")
+         && (
+           action.id == "org.freedesktop.login1.reboot" ||
+           action.id == "org.freedesktop.login1.reboot-multiple-sessions" ||
+           action.id == "org.freedesktop.login1.power-off" ||
+           action.id == "org.freedesktop.login1.power-off-multiple-sessions"
+         )
+       )
+     {
+       return polkit.Result.YES;
+     }
+   });
+  '';
+
+
+
   # Enable the X11 windowing system.
   services.xserver.enable = true;
 
@@ -51,6 +72,9 @@
   services.xserver.windowManager.qtile.enable = true;
   services.xserver.windowManager.qtile.extraPackages = p: with p; [ qtile-extras ];
 
+  # Picom
+  services.picom.enable = true;
+
   # Configure keymap in X11
   services.xserver.xkb = {
     layout = "us";
@@ -59,6 +83,7 @@
 
   # Enable CUPS to print documents.
   services.printing.enable = true;
+
 
   # Enable sound with pipewire.
   hardware.pulseaudio.enable = false;
@@ -90,8 +115,11 @@
     ];
   };
 
-  # Install firefox.
+  # programs to move to home manager later
+  programs.kdeconnect.enable = true;
   programs.firefox.enable = true;
+  programs.nm-applet.enable = true;
+
 
   # Allow unfree packages
   nixpkgs.config.allowUnfree = true;
@@ -103,6 +131,11 @@
     wget
     git
     stow
+    alacritty 
+    megasync
+    lightlocker
+    vscodium
+
   ];
 
   # Some programs need SUID wrappers, can be configured further or are
