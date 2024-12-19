@@ -46,8 +46,10 @@
   services.xserver.enable = true;
 
   # Enable the GNOME Desktop Environment.
-  services.xserver.displayManager.gdm.enable = true;
-  services.xserver.desktopManager.gnome.enable = true;
+  services.xserver.displayManager.lightdm.enable = true;
+  services.xserver.displayManager.lightdm.greeters.slick.enable = true;
+  services.xserver.windowManager.qtile.enable = true;
+  services.xserver.windowManager.qtile.extraPackages = p: with p; [ qtile-extras ];
 
   # Configure keymap in X11
   services.xserver.xkb = {
@@ -84,8 +86,7 @@
     extraGroups = [ "networkmanager" "wheel" ];
     packages = with pkgs; [
     #  thunderbird
-    git
-    stow
+
     ];
   };
 
@@ -99,7 +100,9 @@
   # $ nix search wget
   environment.systemPackages = with pkgs; [
   #  vim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
-  #  wget
+    wget
+    git
+    stow
   ];
 
   # Some programs need SUID wrappers, can be configured further or are
