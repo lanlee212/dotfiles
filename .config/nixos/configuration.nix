@@ -74,6 +74,8 @@
 
   # Picom
   services.picom.enable = true;
+  services.picom.backend = "glx";
+  services.picom.vSync = true ;
 
   # Configure keymap in X11
   services.xserver.xkb = {
