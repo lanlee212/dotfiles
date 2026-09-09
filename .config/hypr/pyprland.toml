@@ -1,0 +1,42 @@
+# pyprland -- qtile DropDown parity scratchpads
+# (replaces the DIY special-workspace script approach)
+[pyprland]
+plugins = ["scratchpads"]
+
+# qtile geometry at 1920x1080: sizes/positions from ~/.config/qtile/config.py
+# term = ghostty DropDown 80%x45% @ (10%, 44px) (F12)
+# y sits just below the top Noctalia bar (32px + 10px margin)
+[scratchpads.term]
+animation = "fromTop"
+command = "ghostty -e bash"
+class = "com.mitchellh.ghostty"
+size = "80% 45%"
+position = "10% 11px"
+lazy = true
+
+# fm = nemo DropDown 80%x80% @ (10%,10%)       (SUPER+a)
+[scratchpads.fm]
+command = "nemo"
+class = "nemo"
+animation = ""
+size = "80% 80%"
+position = "10% 10%"
+lazy = true
+
+# sol = sol DropDown 50%x50% @ (25%,30%)       (SUPER+w)
+[scratchpads.sol]
+command = "sol"
+class = "sol"
+animation = ""
+size = "50% 50%"
+position = "25% 30%"
+lazy = true
+
+# gam = faugus-launcher 60%x60% centered        (SUPER+g)
+[scratchpads.gam]
+command = "faugus-launcher"
+class = "faugus-launcher"
+animation = ""
+size = "60% 60%"
+position = "20% 20%"
+lazy = true

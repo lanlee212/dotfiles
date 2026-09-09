@@ -1,0 +1,81 @@
+# dunst config, themed from qtile OneDark palette
+# (colors.py OneDark: bg #282c34, fg #abb2bf, red #e06c75,
+#  green #98c379, yellow #e5c07b, blue #61afef, purple #c678dd, cyan #56b6c2)
+
+[global]
+    monitor = 0
+    follow = mouse
+    width = 360
+    origin = top-right
+    offset = (15, 30)
+    scale = 0
+    notification_limit = 8
+
+    progress_bar = true
+    progress_bar_height = 8
+    progress_bar_frame_width = 0
+    progress_bar_min_width = 120
+    progress_bar_max_width = 320
+
+    indicate_hidden = yes
+    transparency = 5
+    separator_height = 2
+    padding = 10
+    horizontal_padding = 12
+    text_icon_padding = 8
+    frame_width = 2
+    frame_color = "#61afef"
+    gap_size = 4
+
+    font = "Cantarell 12"
+    line_height = 0
+    markup = full
+    format = "<b>%s</b>\n%b"
+    alignment = left
+    show_age_threshold = 60
+    word_wrap = yes
+    ellipsize = middle
+    ignore_newline = no
+    stack_duplicates = true
+    hide_duplicate_count = false
+    show_indicators = yes
+    icon_position = left
+    min_icon_size = 32
+    max_icon_size = 64
+    icon_path = /usr/share/icons/Papirus/16x16/apps:/usr/share/icons/Papirus/32x32/apps:/usr/share/icons/hicolor/48x48/apps
+    sticky_history = yes
+    history_length = 50
+    browser = /usr/bin/xdg-open
+    always_run_script = true
+    title = Dunst
+    class = Dunst
+    corner_radius = 8
+
+    # Key bindings (global section in dunst >= 1.13)
+    close_all = ctrl+shift+space
+    history = ctrl+grave
+    context = ctrl+shift+period
+
+    # Mouse bindings (global section in dunst >= 1.13)
+    mouse_left_click = do_action
+    mouse_middle_click = close_current
+    mouse_right_click = close_all
+
+[urgency_low]
+    background = "#282c34"
+    foreground = "#abb2bf"
+    timeout = 8
+    highlight = "#56b6c2"
+
+[urgency_normal]
+    background = "#282c34"
+    foreground = "#abb2bf"
+    timeout = 10
+    highlight = "#61afef"
+
+[urgency_critical]
+    background = "#e06c75"
+    foreground = "#282c34"
+    frame_color = "#e06c75"
+    timeout = 0
+    highlight = "#e06c75"

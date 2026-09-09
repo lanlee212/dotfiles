@@ -123,8 +123,8 @@ TomorrowNight = [
 
 OneDark = [
     ["#282c34", "#282c34"], # bg       0
-    ["#c8ccd4", "#c8ccd4"], # fg       1
-    ["#545862", "#545862"], # color01  2
+    ["#abb2bf", "#abb2bf"], # fg       1
+    ["#5c6370", "#5c6370"], # color01  2
     ["#e06c75", "#e06c75"], # color02  3 
     ["#98c379", "#98c379"], # color03  4
     ["#e5c07b", "#e5c07b"], # color04  5

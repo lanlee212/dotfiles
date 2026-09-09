@@ -1,0 +1,10 @@
+# Python junk
+__pycache__/
+*.pyc
+
+# Old backups (git history is the backup now)
+*.save
+*.save[0-9]*
+
+# Editor junk
+*.swp

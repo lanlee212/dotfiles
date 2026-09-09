@@ -1,3 +1,4 @@
+import glob
 import os
 import subprocess
 from libqtile import bar, layout, qtile
@@ -10,90 +11,87 @@ from qtile_extras.popup.toolkit import (
     PopupRelativeLayout,
     PopupImage,
     PopupText )
+from battery import BatteryGauge
+from launcher import AppLauncher
+from nothistory import HistoryPopup, bell_text
+from power_menu import PowerMenu
+from volumegauge import VolumeGauge
 import colors
 
 # set color theme form colors.py 
 colors = colors.OneDark
+
+# battery gauge only exists on machines that have one (laptops)
+_has_battery = bool(glob.glob("/sys/class/power_supply/BAT*"))
+_battery_gauge = BatteryGauge(
+    bar_text_foreground=colors[2],
+    colour_low=colors[3],
+    colour_mid=colors[5],
+    colour_high=colors[4],
+) if _has_battery else None
+
+def vol_set(qtile, op):
+    """Change volume + refresh the gauge instantly (no poll lag)."""
+    qtile.spawn(f"pactl set-sink-volume @DEFAULT_SINK@ {op}")
+    gauge = qtile.widgets_map.get("volumegauge")
+    if gauge:
+        gauge.refresh()
+
+
+def vol_toggle_mute(qtile):
+    """Toggle mute + refresh the gauge instantly."""
+    qtile.spawn("pactl set-sink-mute @DEFAULT_SINK@ toggle")
+    gauge = qtile.widgets_map.get("volumegauge")
+    if gauge:
+        gauge.refresh()
+
 
 @hook.subscribe.startup_once
 def autostart():
     home = os.path.expanduser("~/.config/qtile/autostart.sh")
     subprocess.run([home])
 
-def show_power_menu(qtile):
-
-    controls = [
-        PopupText(
-            text="",
-            pos_x=0.15,
-            pos_y=0.1,
-            width=0.1,
-            height=0.5,
-            mouse_callbacks={
-                "Button1": lazy.spawn("betterlockscreen -l")
-            }
-        ),
-        PopupText(
-            text="󰒲",
-            pos_x=0.45,
-            pos_y=0.1,
-            width=0.1,
-            height=0.5,
-            mouse_callbacks={
-                "Button1": lazy.spawn("/path/to/sleep_cmd")
-            }
-        ),
-        PopupText(
-            filename="⏻",
-            pos_x=0.75,
-            pos_y=0.1,
-            width=0.1,
-            height=0.5,
-            highlight="A00000",
-            mouse_callbacks={
-                "Button1": lazy.shutdown()
-            }
-        ),
-        PopupText(
-            text="Lock",
-            pos_x=0.1,
-            pos_y=0.7,
-            width=0.2,
-            height=0.2,
-            h_align="center"
-        ),
-        PopupText(
-            text="Sleep",
-            pos_x=0.4,
-            pos_y=0.7,
-            width=0.2,
-            height=0.2,
-            h_align="center"
-        ),
-        PopupText(
-            text="Shutdown",
-            pos_x=0.7,
-            pos_y=0.7,
-            width=0.2,
-            height=0.2,
-            h_align="center"
-        ),
-    ]
-
-    layout = PopupRelativeLayout(
+def show_app_launcher(qtile):
+    """Rofi-style app launcher popup, themed from config.py."""
+    AppLauncher(
         qtile,
-        width=1000,
-        height=200,
-        controls=controls,
-        background="00000060",
-        initial_focus=None,
+        colors=colors,
+        font=widget_defaults["font"],
+        fontsize=widget_defaults["fontsize"],
+        terminal=terminal,
+    ).show(centered=True, qtile=qtile)
+
+def show_notif_history(qtile):
+    """Notification history popup, themed from config.py — just above the bar,
+    right-aligned with the bar's right edge."""
+    popup = HistoryPopup(
+        qtile,
+        colors=colors,
+        font=widget_defaults["font"],
+        fontsize=widget_defaults["fontsize"],
+    )
+    bar = qtile.current_screen.bottom
+    m = bar.margin
+    m = m[1] if isinstance(m, (list, tuple)) else m  # right margin
+    popup.show(
+        x=qtile.current_screen.width - popup.width - m,
+        y=qtile.current_screen.height - bar.size - m - popup.height - 4,
+        qtile=qtile,
     )
 
-    layout.show(centered=True)
+
+def show_power_menu(qtile):
+    """Power menu popup, themed from config.py."""
+    PowerMenu(
+        qtile,
+        colors=colors,
+        font=widget_defaults["font"],
+        fontsize=widget_defaults["fontsize"],
+    ).show(centered=True, qtile=qtile)
 
 
 mod = "mod4"
-terminal = guess_terminal()
+terminal = "ghostty"
 
 keys = [
     # A list of available commands that can be bound to keys can be found
@@ -103,11 +101,13 @@ keys = [
     Key([mod], "right", lazy.layout.right(), desc="Move focus to right"),
     Key([mod], "down", lazy.layout.down(), desc="Move focus down"),
     Key([mod], "up", lazy.layout.up(), desc="Move focus up"),
-    Key([], "XF86AudioMute", lazy.spawn ("pactl set-sink-mute @DEFAULT_SINK@ toggle"),),
-    Key([], "XF86AudioRaiseVolume", lazy.spawn ("pactl set-sink-volume @DEFAULT_SINK@ +5%"),),
-    Key([], "XF86AudioLowerVolume", lazy.spawn ("pactl set-sink-volume @DEFAULT_SINK@ -5%"),),
+    Key([], "XF86AudioMute", lazy.function(vol_toggle_mute),),
+    Key([], "XF86AudioRaiseVolume", lazy.function(vol_set, "+5%"),),
+    Key([], "XF86AudioLowerVolume", lazy.function(vol_set, "-5%"),),
+    Key([], "XF86MonBrightnessUp", lazy.spawn("brightnessctl set +5%"),),
+    Key([], "XF86MonBrightnessDown", lazy.spawn("brightnessctl set 5%-"),),
     Key([mod], "space", lazy.layout.next(), desc="Move window focus to other window"),
-    Key([mod, "shift"], "n",  lazy.spawn ("zen-browser --private-window"),),
+    Key([mod, "shift"], "n",  lazy.spawn ("brave-origin --incognito"),),
     # Move windows between left/right columns or move up/down in current stack.
 	# Moving out of range in Columns layout will create new column.
     Key([mod, "shift"], "left", lazy.layout.shuffle_left(), desc="Move window to the left"),
@@ -116,10 +116,8 @@ keys = [
     Key([mod, "shift"], "up", lazy.layout.shuffle_up(), desc="Move window up"),
     # Grow windows. If current window is on the edge of screen and direction
     # will be to screen edge - window would shrink.
-    Key([mod, "control"], "left", lazy.layout.grow_left(), desc="Grow window to the left"),
-    Key([mod, "control"], "right", lazy.layout.grow_right(), desc="Grow window to the right"),
-    Key([mod, "control"], "down", lazy.layout.grow_down(), desc="Grow window down"),
-    Key([mod, "control"], "up", lazy.layout.grow_up(), desc="Grow window up"),
+    Key([mod, "control"], "left", lazy.layout.shrink_main(), desc="Grow window to the left"),
+    Key([mod, "control"], "right", lazy.layout.grow_main(), desc="Grow window to the right"),
     Key([mod], "n", lazy.layout.normalize(), desc="Reset all window sizes"),
     # Toggle between split and unsplit sides of stack.
     # Split = all windows displayed
@@ -135,9 +133,12 @@ keys = [
     Key([mod], "t", lazy.window.toggle_floating(), desc="Toggle floating on the focused window"),
     Key([mod, "control"], "r", lazy.reload_config()),
     Key([mod, "control"], "q", lazy.shutdown(), desc="Shutdown Qtile"),
-    Key([mod], "d", lazy.spawn("dlauncher-toggle"), desc="Dlauncher"),
+    Key([mod], "d", lazy.function(show_app_launcher), desc="App launcher"),
+    Key([mod], "grave", lazy.function(show_notif_history), desc="Notification history"),
     Key([mod], "r", lazy.spawncmd(), desc="Spawn a command using a prompt widget"),
-    Key([mod], "l", lazy.spawn("light-locker-command -l"), desc="Lock Screen"),
+    Key([mod], "l", lazy.spawn("systemctl suspend"), desc="Lock Screen"),
+    Key([], "Print", lazy.spawn("scrot -u '%Y-%m-%d-%T.png' -e 'mv $f ~/Pictures/'")),
+
     ]
 
 # Add key bindings to switch VTs in Wayland.
@@ -180,16 +181,19 @@ for i in groups:
 # scratch pad and key binds below
 groups.append(
     ScratchPad("scratchpad", [
-        DropDown('terminal',terminal,height = 0.45,width = 0.8,x = 0.1,y = 0.01,on_focus_lost_hide = False, warp_pointer = False, ),
-        DropDown('fm','thunar',height = 0.8,width = 0.8,x = 0.1,y = 0.1,on_focus_lost_hide = False, warp_pointer = False, ),
-        DropDown('ai','alacritty -e ollama run bimbo',height = 0.4,width = 0.8,x = 0.1,y = 0.01,on_focus_lost_hide = False, warp_pointer = False, ),
+        DropDown('terminal',terminal, match=Match(wm_class='com.mitchellh.ghostty'),height = 0.45,width = 0.8,x = 0.1,y = 0.01,on_focus_lost_hide = False, warp_pointer = False, ),
+        # DropDown('fm','thunar',height = 0.8,width = 0.8,x = 0.1,y = 0.1,on_focus_lost_hide = False, warp_pointer = False, ),
+        DropDown('fm','nemo',height = 0.8,width = 0.8,x = 0.1,y = 0.1,on_focus_lost_hide = False, warp_pointer = False, ),
+        DropDown('sol','sol',height = 0.5,width = 0.5,x = 0.25,y = 0.3,on_focus_lost_hide = True, warp_pointer = False, ),
+        DropDown('gam','faugus-launcher',x = 0.4,y = 0.2,on_focus_lost_hide = True, warp_pointer = False, ),
     ]),
 )
 keys.extend(
     [
         Key([], 'F12', lazy.group['scratchpad'].dropdown_toggle('terminal')),
         Key([mod], 'a', lazy.group['scratchpad'].dropdown_toggle('fm')),
-        Key([mod], 'w', lazy.group['scratchpad'].dropdown_toggle('ai')),
+        Key([mod], 'w', lazy.group['scratchpad'].dropdown_toggle('sol')),
+        Key([mod], 'g', lazy.group['scratchpad'].dropdown_toggle('gam')),
     
     ]
 )
@@ -211,7 +215,7 @@ layouts = [
     # layout.Matrix(),
     layout.MonadTall(**layout_theme),
     layout.Max(**layout_theme ),
-    # layout.MonadWide(),
+    layout.MonadThreeCol(**layout_theme),
     # layout.RatioTile(),
     # layout.Tile(),
     # layout.TreeTab(),
@@ -243,9 +247,11 @@ screens = [
                 #widget.WindowTabs(),
                 widget.TaskList (border = colors[6]),
                 # NB Systray is incompatible with Wayland, consider using StatusNotifier instead
-                widget.ALSAWidget(update_interval=0,bar_colour_normal=colors[4],bar_colour_loud=colors[3],bar_colour_high=colors[5],bar_text_foreground=colors[2]),
-                widget.StatusNotifier(icon_size = 16),
-                widget.Systray(icon_size = 16),
+                VolumeGauge(update_interval=2, bar_text_foreground=colors[2], colour_normal=colors[4], colour_high=colors[5], colour_loud=colors[3], mouse_callbacks={"Button1": lazy.function(vol_toggle_mute)}),
+                *([_battery_gauge] if _has_battery else []),
+                #widget.StatusNotifier(icon_size = 16, icon_theme ="Papirus-Dark"),
+                widget.Systray(icon_size = 16,icon_theme ="Papirus-Dark"),
+                widget.GenPollText(func=bell_text, update_interval=15, mouse_callbacks={"Button1": lazy.function(show_notif_history)}, foreground=colors[1]),
                 widget.Clock(format="%Y-%m-%d %a %I:%M %p"),
             ],
             30,
