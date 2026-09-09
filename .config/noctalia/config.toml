@@ -1,0 +1,6 @@
+# Noctalia hand-written base config.
+# GUI overrides live in ~/.local/state/noctalia/settings.toml and win over this file.
+
+[shell]
+# No rounded corners anywhere (default is 1.2)
+corner_radius_scale = 0.0

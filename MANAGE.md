@@ -1,6 +1,6 @@
 # Dotfiles — How To Manage
 
-Setup: ~/.config/{qtile,hypr,dunst} are SYMLINKS into this repo (~/dotfiles).
+Setup: ~/.config/{qtile,hypr,dunst,noctalia} are SYMLINKS into this repo (~/dotfiles).
 Editing a config = editing the repo. No copying, ever.
 
 ## Machines on the farm
@@ -25,6 +25,9 @@ Editing a config = editing the repo. No copying, ever.
 ## Rules / gotchas
 - Machine-specific stuff (monitor layouts, per-host autostart) does NOT belong
   in shared files — guard it with a hostname check or keep it out of the repo
+- noctalia: only the hand-written base (~/.config/noctalia/config.toml) is
+  synced. GUI tweaks live in ~/.local/state/noctalia/settings.toml and win over
+  the file — that state dir is machine-local and intentionally NOT synced
 - .gitignore covers __pycache__, *.pyc, *.save backups — git history replaces
   those old backup files
 - Anything in Qqsp/ is untracked build junk, leave it alone
