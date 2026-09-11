@@ -24,13 +24,16 @@ position = "10% 10%"
 lazy = true
 
 # sol = sol DropDown 50%x50% @ (25%,30%)       (SUPER+w)
-[scratchpads.sol]
-command = "sol"
-class = "sol"
-animation = ""
-size = "50% 50%"
-position = "25% 30%"
-lazy = true
+# MOVED TO NATIVE config 2026-09: pyprland can't drive Hyprland 0.56's Lua
+# dispatch, so aisleriot is now a native special:sol workspace
+# (window rule + bind in hyprland.lua) toggled by scripts/scratch-sol.sh.
+#[scratchpads.sol]
+#command = "flatpak run org.gnome.Aisleriot"
+#class = "sol"
+#animation = ""
+#size = "50% 50%"
+#position = "25% 30%"
+#lazy = true
 
 # gam = faugus-launcher 60%x60% centered        (SUPER+g)
 [scratchpads.gam]

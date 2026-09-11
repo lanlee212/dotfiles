@@ -56,7 +56,7 @@ hl.config({
 		noise = 0,
 		ignore_opacity = false,
 		size = 1,
-		contrast = 2,
+		contrast = 1,
 		brightness = 2,
 		},
     },
@@ -114,6 +114,10 @@ hl.window_rule({ match = { class = "^python3$", title = "^qxdrag$" },      float
 hl.window_rule({ match = { class = "^(yesplaymusic|clash-verge|baidunetdisk)$" }, size = {1500, 900} })
 hl.window_rule({ match = { class = "^blueman-manager$" },                          size = {1500, 900} })
 
+-- scratchpad: sol (aisleriot) -- native special workspace, toggled by SUPER+S
+-- (pyprland can't drive 0.56 Lua dispatch; see scripts/scratch-sol.sh)
+hl.window_rule({ match = { class = "^sol$" }, workspace = "special:sol silent", float = true, size = {960, 540}, center = true })
+
 ------------------ KEYBINDS ------------------
 local mainMod = "SUPER"
 
@@ -134,7 +138,7 @@ hl.bind(mainMod .. " + up",    hl.dsp.focus({ direction = "up" }))
 hl.bind(mainMod .. " + down",  hl.dsp.focus({ direction = "down" }))
 hl.bind(mainMod .. " + space", hl.dsp.layout("cyclenext"))
 -- mod+Tab: cycle layout master <-> dwindle (script flips general:layout)
-hl.bind(mainMod .. " + Tab",   hl.dsp.exec_cmd("~/.config/hypr/scripts/cycle-layout.sh"))
+hl.bind(mainMod .. " + Tab",   hl.dsp.exec_cmd("noctalia msg plugin maddingo/hypr-layout-switcher:poller all cycle"))
 
 -- move window (qtile: mod+shift+arrows = shuffle)
 hl.bind(mainMod .. " + SHIFT + left",  hl.dsp.window.move({ direction = "left" }))
@@ -160,7 +164,7 @@ hl.bind(mainMod .. " + SHIFT + N", hl.dsp.exec_cmd("brave-origin --incognito"))
 -- handled by pyprland (qtile DropDown parity, see pyprland.toml)
 hl.bind("F12",             hl.dsp.exec_cmd("pypr toggle term"))
 hl.bind(mainMod .. " + A", hl.dsp.exec_cmd("pypr toggle fm"))
-hl.bind(mainMod .. " + S", hl.dsp.exec_cmd("pypr toggle sol"))
+hl.bind(mainMod .. " + S", hl.dsp.exec_cmd("~/.config/hypr/scripts/scratch-sol.sh"))  -- native scratchpad (spawn-if-empty + toggle)
 hl.bind(mainMod .. " + G", hl.dsp.exec_cmd("pypr toggle gam"))
 
 
