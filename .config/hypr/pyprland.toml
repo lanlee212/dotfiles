@@ -1,15 +1,12 @@
-# pyprland -- qtile DropDown parity scratchpads
+# pyprland -- 
 # (replaces the DIY special-workspace script approach)
 [pyprland]
 plugins = ["scratchpads"]
 
-# qtile geometry at 1920x1080: sizes/positions from ~/.config/qtile/config.py
-# term = ghostty DropDown 80%x45% @ (10%, 44px) (F12)
-# y sits just below the top Noctalia bar (32px + 10px margin)
 [scratchpads.term]
 animation = "fromTop"
-command = "ghostty -e bash"
-class = "com.mitchellh.ghostty"
+command = " foot -a footdrop"
+class = " footdrop"
 size = "80% 45%"
 position = "10% 11px"
 lazy = true
