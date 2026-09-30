@@ -1,16 +1,18 @@
-# pyprland -- 
+# pyprland --
 # (replaces the DIY special-workspace script approach)
 [pyprland]
 plugins = ["scratchpads"]
 
 [scratchpads.term]
 animation = "fromTop"
-command = " foot -a footdrop"
+command = "foot -a footdrop"
 class = " footdrop"
 size = "80% 45%"
 position = "10% 11px"
 lazy = true
-
+smart_focus = true
+unfocus = "hide"
+pinned = false
 # fm = nemo DropDown 80%x80% @ (10%,10%)       (SUPER+a)
 [scratchpads.fm]
 command = "nemo"
@@ -19,18 +21,23 @@ animation = ""
 size = "80% 80%"
 position = "10% 10%"
 lazy = true
-
+smart_focus = true
+unfocus = "hide"
+pinned = false
 # sol = sol DropDown 50%x50% @ (25%,30%)       (SUPER+w)
 # MOVED TO NATIVE config 2026-09: pyprland can't drive Hyprland 0.56's Lua
 # dispatch, so aisleriot is now a native special:sol workspace
 # (window rule + bind in hyprland.lua) toggled by scripts/scratch-sol.sh.
-#[scratchpads.sol]
-#command = "flatpak run org.gnome.Aisleriot"
-#class = "sol"
-#animation = ""
-#size = "50% 50%"
-#position = "25% 30%"
-#lazy = true
+[scratchpads.sol]
+command = "sol --name=sol-drop"
+class = "sol-drop"
+animation = ""
+size = "50% 50%"
+position = "25% 30%"
+lazy = true
+smart_focus = true
+unfocus = "hide"
+pinned = false
 
 # gam = faugus-launcher 60%x60% centered        (SUPER+g)
 [scratchpads.gam]
@@ -40,3 +47,6 @@ animation = ""
 size = "60% 60%"
 position = "20% 20%"
 lazy = true
+smart_focus = true
+unfocus = "hide"
+pinned = false
