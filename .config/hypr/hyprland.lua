@@ -89,6 +89,49 @@ hl.config({
     },
 })
 
+------------------ ULTRAWIDE 20/60/20 LAYOUT ------------------
+-- Three fixed columns (20% / 60% / 20%), center column is the main window.
+-- Registered only -- it does not become your layout until you select it:
+--   live/one-off:  hl.config({ general = { layout = "lua:ultrawide" } })
+--   permanent:     set general.layout = "lua:ultrawide" in the block above.
+-- The "lua:" prefix is required; a bare "ultrawide" parses fine and then
+-- silently falls back to dwindle. Window 1 goes center, later windows
+-- alternate left/right and stack vertically inside their column.
+hl.layout.register("ultrawide", {
+    recalculate = function(ctx)
+        local n = #ctx.targets
+        if n == 0 then return end
+
+        local a  = ctx.area
+        local wl = math.floor(a.w * 0.20)
+        local wr = math.floor(a.w * 0.20)
+        local wm = a.w - wl - wr
+
+        -- column geometry: 1 = left, 2 = center, 3 = right
+        local cx = { a.x, a.x + wl, a.x + wl + wm }
+        local cw = { wl, wm, wr }
+
+        local col  = { [1] = 2 }
+        local side = 1
+        for i = 2, n do
+            col[i] = side
+            side = (side == 1) and 3 or 1
+        end
+
+        local total, seen = { 0, 0, 0 }, { 0, 0, 0 }
+        for i = 1, n do total[col[i]] = total[col[i]] + 1 end
+
+        for i = 1, n do
+            local c = col[i]
+            seen[c] = seen[c] + 1
+            local h = math.floor(a.h / total[c])
+            local y = a.y + (seen[c] - 1) * h
+            if seen[c] == total[c] then h = a.y + a.h - y end
+            ctx.targets[i]:place({ x = cx[c], y = y, w = cw[c], h = h })
+        end
+    end,
+})
+
 ------------------ INPUT ------------------
 hl.config({
     input = {
@@ -137,6 +180,11 @@ hl.bind(mainMod .. " + down",  hl.dsp.focus({ direction = "down" }))
 hl.bind(mainMod .. " + space", hl.dsp.layout("cyclenext"))
 -- mod+Tab: cycle layout master <-> dwindle (script flips general:layout)
 hl.bind(mainMod .. " + Tab",   hl.dsp.exec_cmd("noctalia msg plugin maddingo/hypr-layout-switcher:poller all cycle"))
+-- mod+Tab+A: switch to the ultrawide 20/60/20 layout (registered above).
+-- Longer chord on the same prefix, so plain mod+Tab now fires on key release.
+hl.bind(mainMod .. " + Tab + A", function()
+    hl.config({ general = { layout = "lua:ultrawide" } })
+end)
 hl.bind("ALT + TAB", hl.dsp.exec_cmd("noctalia msg window-switcher hold"))
 -- move window (qtile: mod+shift+arrows = shuffle)
 hl.bind(mainMod .. " + SHIFT + left",  hl.dsp.window.move({ direction = "left" }))
