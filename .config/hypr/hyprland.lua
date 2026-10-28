@@ -22,14 +22,17 @@ hl.env("XDG_MENU_PREFIX", "gnome-")
 
 ------------------ AUTOSTART ------------------
 -- (qtile autostart minus picom/dunst/xautolock: Noctalia owns those now)
+-- Wrapped in `uwsm app --` so each one runs in its own systemd user scope:
+-- journal logging, proper cgroup teardown at logout. `uwsm app` also works
+-- from the plain non-uwsm "Hyprland" session entry.
 hl.on("hyprland.start", function()
     --hl.exec_cmd("/usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1")
-    hl.exec_cmd("/usr/bin/foot --server")
-    hl.exec_cmd("wl-clip-persist --clipboard regular --reconnect-tries 0")
-    hl.exec_cmd("wl-paste --type text --watch cliphist store")
-    hl.exec_cmd("kdeconnect-indicator")
-    hl.exec_cmd(" pypr --config ~/.config/hypr/pyprland.toml")          -- scratchpad daemon (qtile DropDown parity)
-    hl.exec_cmd("noctalia")
+    hl.exec_cmd("uwsm app -- /usr/bin/foot --server")
+    hl.exec_cmd("uwsm app -- wl-clip-persist --clipboard regular --reconnect-tries 0")
+    hl.exec_cmd("uwsm app -- wl-paste --type text --watch cliphist store")
+    hl.exec_cmd("uwsm app -- kdeconnect-indicator")
+    hl.exec_cmd("uwsm app -- pypr --config ~/.config/hypr/pyprland.toml")  -- scratchpad daemon (qtile DropDown parity)
+    hl.exec_cmd("uwsm app -- noctalia")
     --hl.exec_cmd("foot -server")
 end)
 
@@ -54,7 +57,6 @@ hl.config({
         },
         blur = {
 		passes = 1,
-		variant = kawase,
 		noise = 0,
 		ignore_opacity = false,
 		size = 1,
