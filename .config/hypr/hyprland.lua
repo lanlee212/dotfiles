@@ -67,6 +67,13 @@ hl.config({
 
     },
 
+    cursor = {
+        -- F45/amdgpu: the hardware cursor plane is dead after the rebase --
+        -- cursor is invisible everywhere while the mouse still works.
+        -- 1 = always render the cursor in software.
+        no_hardware_cursors = 1,
+    },
+
 })
 
 ------------------ LAYOUTS ------------------
